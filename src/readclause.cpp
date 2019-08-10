@@ -234,7 +234,7 @@ static unsigned char walpha_tab[MAX_WALPHA-0xff] = {
       1,0xff,   1,0xff };    // 230
 
 // use ctype.h functions for Latin1 (character < 0x100)
-int iswalpha(wint_t c)
+int iswalpha_(wint_t c)
 {
 	if(c < 0x100)
 		return(isalpha(c));
@@ -245,21 +245,21 @@ int iswalpha(wint_t c)
 	return(walpha_tab[c-0x100]);
 }
 
-int iswdigit(wint_t c)
+int iswdigit_(wint_t c)
 {
 	if(c < 0x100)
 		return(isdigit(c));
 	return(0);
 }
 
-int iswalnum(wint_t c)
+int iswalnum_(wint_t c)
 {
-	if(iswdigit(c))
+	if(iswdigit_(c))
 		return(1);
-	return(iswalpha(c));
+	return(iswalpha_(c));
 }
 
-wint_t towlower(wint_t c)
+wint_t towlower_(wint_t c)
 {
 	int x;
 	if(c < 0x100)
@@ -275,7 +275,7 @@ wint_t towlower(wint_t c)
 	return(c + x);  // convert to lower case
 }
 
-wint_t towupper(wint_t c)
+wint_t towupper_(wint_t c)
 {
 	// check whether the previous character code is the upper-case equivalent of this character
 	if(tolower(c-1) == c)
@@ -283,7 +283,7 @@ wint_t towupper(wint_t c)
 	return(c);  // no
 }
 
-int iswupper(wint_t c)
+int iswupper_(wint_t c)
 {
 	int x;
 	if(c < 0x100)
@@ -293,7 +293,7 @@ int iswupper(wint_t c)
 	return(1);
 }
 
-int iswlower(wint_t c)
+int iswlower_(wint_t c)
 {
 	if(c < 0x100)
 		return(islower(c));
@@ -302,21 +302,21 @@ int iswlower(wint_t c)
 	return(1);
 }
 
-int iswspace(wint_t c)
+int iswspace_(wint_t c)
 {
 	if(c < 0x100)
 		return(isspace(c));
 	return(0);
 }
 
-int iswpunct(wint_t c)
+int iswpunct_(wint_t c)
 {
 	if(c < 0x100)
 		return(ispunct(c));
 	return(0);
 }
 
-const wchar_t *wcschr(const wchar_t *str, int c)
+const wchar_t *wcschr_(const wchar_t *str, int c)
 {
    while(*str != 0)
    {
@@ -329,7 +329,7 @@ const wchar_t *wcschr(const wchar_t *str, int c)
 
 #ifndef WINCE
 // wcslen() is provided by WINCE, but not the other wchar functions
-const int wcslen(const wchar_t *str)
+const int wcslen_(const wchar_t *str)
 {
 	int ix=0;
 
@@ -341,7 +341,7 @@ const int wcslen(const wchar_t *str)
 }
 #endif
 
-float wcstod(const wchar_t *str, wchar_t **tailptr)
+float wcstod_(const wchar_t *str, wchar_t **tailptr)
 {
    int ix;
    char buf[80];
@@ -374,7 +374,7 @@ int towlower2(unsigned int c)
 	if(c == 0x130)   // uppercase i-dot
 		return('i');
 #endif
-	return(towlower(c));
+	return(towlower_(c));
 }
 
 
@@ -1203,7 +1203,7 @@ static wchar_t *GetSsmlAttribute(wchar_t *pw, const char *name)
 
 	while(*pw != 0)
 	{
-		if(iswspace(pw[-1]))
+		if(iswspace_(pw[-1]))
 		{
 			ix = 0;
 			while(*pw == name[ix])
@@ -1214,9 +1214,9 @@ static wchar_t *GetSsmlAttribute(wchar_t *pw, const char *name)
 			if(name[ix]==0)
 			{
 				// found the attribute, now get the value
-				while(iswspace(*pw)) pw++;
+				while(iswspace_(*pw)) pw++;
 				if(*pw == '=') pw++;
-				while(iswspace(*pw)) pw++;
+				while(iswspace_(*pw)) pw++;
 				if((*pw == '"') || (*pw == '\''))  // allow single-quotes ?
 					return(pw+1);
 				else
@@ -1269,7 +1269,7 @@ static int attrnumber(const wchar_t *pw, int default_value, int type)
 	{
 		value = value*10 + *pw++ - '0';
 	}
-	if((type==1) && (towlower(*pw)=='s'))
+	if((type==1) && (towlower_(*pw)=='s'))
 	{
 		// time: seconds rather than ms
 		value *= 1000;
@@ -1310,7 +1310,7 @@ static int attr_prosody_value(int param_type, const wchar_t *pw, int *value_out)
 	wchar_t *tail;
 	double value;
 
-	while(iswspace(*pw)) pw++;
+	while(iswspace_(*pw)) pw++;
 	if(*pw == '+')
 	{
 		pw++;
@@ -1321,7 +1321,7 @@ static int attr_prosody_value(int param_type, const wchar_t *pw, int *value_out)
 		pw++;	
 		sign = -1;
 	}
-	value = (double)wcstod(pw,&tail);
+	value = (double)wcstod_(pw,&tail);
 	if(tail == pw)
 	{
 		// failed to find a number, return 100%
@@ -1370,7 +1370,7 @@ int AddNameData(const char *name, int wide)
 
 	if(wide)
 	{
-		len = (wcslen((const wchar_t *)name)+1)*sizeof(wchar_t);
+		len = (wcslen_((const wchar_t *)name)+1)*sizeof(wchar_t);
 		n_namedata = (n_namedata + sizeof(wchar_t) - 1) % sizeof(wchar_t);  // round to wchar_t boundary
 	}
 	else
@@ -1658,7 +1658,7 @@ static int ProcessSsmlTag(wchar_t *xml_buf, char *outbuf, int &outix, int n_outb
 
 	for(ix=0; ix<(sizeof(tag_name)-1); ix++)
 	{
-		if(((c = xml_buf[ix]) == 0) || iswspace(c))
+		if(((c = xml_buf[ix]) == 0) || iswspace_(c))
 			break;
 		tag_name[ix] = tolower((char)c);
 	}
@@ -2108,7 +2108,7 @@ f_input = f_in;  // for GetC etc
 
 	while(!Eof() || (ungot_char != 0) || (ungot_char2 != 0) || (ungot_string_ix >= 0))
 	{
-		if(!iswalnum(c1))
+		if(!iswalnum_(c1))
 		{
 			if((end_character_position > 0) && (count_characters > end_character_position))
 			{
@@ -2162,7 +2162,7 @@ f_input = f_in;  // for GetC etc
 			{
 				n_xml_buf = 0;
 				c1 = c2;
-				while(!Eof() && (iswalnum(c1) || (c1=='#')) && (n_xml_buf < N_XML_BUF2))
+				while(!Eof() && (iswalnum_(c1) || (c1=='#')) && (n_xml_buf < N_XML_BUF2))
 				{
 					xml_buf2[n_xml_buf++] = c1;
 					c1 = GetC();
@@ -2221,7 +2221,7 @@ f_input = f_in;  // for GetC etc
 					c2 = ' ';
 				}
 				else
-				if((c2 == '/') || iswalpha(c2))
+				if((c2 == '/') || iswalpha_(c2))
 				{
 					// SSML Tag
 					n_xml_buf = 0;
@@ -2294,7 +2294,7 @@ f_input = f_in;  // for GetC etc
 			if(c2 == 'V')
 			{
 				buf[ix++] = 0;      // end the clause at this point
-				while(!iswspace(c1 = GetC()) && !Eof() && (ix < (n_buf-1)))
+				while(!iswspace_(c1 = GetC()) && !Eof() && (ix < (n_buf-1)))
 					buf[ix++] = c1;  // add voice name to end of buffer, after the text
 				buf[ix++] = 0;
 				return(CLAUSE_VOICE);
@@ -2317,7 +2317,7 @@ f_input = f_in;  // for GetC etc
 					{
 						// a list of punctuation characters to be spoken, terminated by space
 						j = 0;
-						while(!iswspace(c2) && !Eof())
+						while(!iswspace_(c2) && !Eof())
 						{
 							option_punctlist[j++] = c2;
 							c2 = GetC();
@@ -2334,7 +2334,7 @@ f_input = f_in;  // for GetC etc
 
 		linelength++;
 
-		if(iswalnum(c1))
+		if(iswalnum_(c1))
 			any_alnum = 1;
 		else
 		{
@@ -2352,7 +2352,7 @@ f_input = f_in;  // for GetC etc
 				continue;
 			}
 
-			if(iswspace(c1))
+			if(iswspace_(c1))
 			{
 				char *p_word;
 	
@@ -2386,10 +2386,10 @@ f_input = f_in;  // for GetC etc
 			}
 		}
 
-		if(iswupper(c1))
+		if(iswupper_(c1))
 		{
 			tr->clause_upper_count++;
-			if((option_capitals == 2) && (sayas_mode == 0) && !iswupper(cprev))
+			if((option_capitals == 2) && (sayas_mode == 0) && !iswupper_(cprev))
 			{
 				char text_buf[40];
 				char text_buf2[30];
@@ -2406,7 +2406,7 @@ f_input = f_in;  // for GetC etc
 			}
 		}
 		else
-		if(iswalpha(c1))
+		if(iswalpha_(c1))
 			tr->clause_lower_count++;
 
 		if(option_phoneme_input)
@@ -2426,7 +2426,7 @@ f_input = f_in;  // for GetC etc
 			parag = 0;
 
 			// count consecutive newlines, ignoring other spaces
-			while(!Eof() && iswspace(c2))
+			while(!Eof() && iswspace_(c2))
 			{
 				if(c2 == '\n')
 					parag++;
@@ -2474,9 +2474,9 @@ if(option_ssml) parag=1;
 				// next non-blank character to decide whether to end the clause
 				// i.e. is dot followed by an upper-case letter?
 				
-				if(!iswspace(c1))
+				if(!iswspace_(c1))
 				{
-					if(!IsAlpha(c1) || !iswlower(c1))
+					if(!IsAlpha(c1) || !iswlower_(c1))
 //					if(iswdigit(c1) || (IsAlpha(c1) && !iswlower(c1)))
 					{
 						UngetC(c2);
@@ -2516,7 +2516,7 @@ if(option_ssml) parag=1;
 					continue;
 				}
 
-				if((iswspace(c2) || (punct_data & 0x8000) || IsBracket(c2) || (c2=='?') || Eof() || (c2 == ctrl_embedded)))    // don't check for '-' because it prevents recognizing ':-)'
+				if((iswspace_(c2) || (punct_data & 0x8000) || IsBracket(c2) || (c2=='?') || Eof() || (c2 == ctrl_embedded)))    // don't check for '-' because it prevents recognizing ':-)'
 //				if((iswspace(c2) || (punct_data & 0x8000) || IsBracket(c2) || (c2=='?') || (c2=='-') || Eof()))
 				{
 					// note: (c2='?') is for when a smart-quote has been replaced by '?'
@@ -2526,11 +2526,11 @@ if(option_ssml) parag=1;
 
 			// don't announce punctuation for the alternative text inside inside <audio> ... </audio>
 			if(c1 == 0xe000+'<')  c1 = '<';
-			if(option_punctuation && iswpunct(c1) && (audio_text == 0))
+			if(option_punctuation && iswpunct_(c1) && (audio_text == 0))
 			{
 				// option is set to explicitly speak punctuation characters
 				// if a list of allowed punctuation has been set up, check whether the character is in it
-				if((option_punctuation == 1) || (wcschr(option_punctlist,c1) != NULL))
+				if((option_punctuation == 1) || (wcschr_(option_punctlist,c1) != NULL))
 				{
 					tr->phonemes_repeat_count = 0;
 					if((terminator = AnnouncePunctuation(tr, c1, &c2, buf, &ix, is_end_clause)) >= 0)
@@ -2559,9 +2559,9 @@ if(option_ssml) parag=1;
 				nl_count = 0;
 				c_next = c2;
 
-				if(iswspace(c_next))
+				if(iswspace_(c_next))
 				{
-					while(!Eof() && iswspace(c_next))
+					while(!Eof() && iswspace_(c_next))
 					{
 						if(c_next == '\n')
 							nl_count++;
@@ -2576,7 +2576,7 @@ if(option_ssml) parag=1;
 
 				if(nl_count==0)
 				{
-					if((c1 == ',') && (cprev == '.') && (tr->translator_name == L('h','u')) && iswdigit(cprev2) && (iswdigit(c_next) || (iswlower(c_next))))
+					if((c1 == ',') && (cprev == '.') && (tr->translator_name == L('h','u')) && iswdigit_(cprev2) && (iswdigit_(c_next) || (iswlower_(c_next))))
 					{
 						// lang=hu, fix for ordinal numbers, eg:  "december 2., szerda", ignore ',' after ordinal number
 						c1 = CHAR_COMMA_BREAK;
@@ -2586,16 +2586,16 @@ if(option_ssml) parag=1;
 					if(c1 == '.')
 					{
 						if((tr->langopts.numbers & NUM_ORDINAL_DOT) && 
-							(iswdigit(cprev) || (IsRomanU(cprev) && (IsRomanU(cprev2) || iswspace(cprev2)))))  // lang=hu
+							(iswdigit_(cprev) || (IsRomanU(cprev) && (IsRomanU(cprev2) || iswspace_(cprev2)))))  // lang=hu
 						{
 							// dot after a number indicates an ordinal number
-							if(!iswdigit(cprev))
+							if(!iswdigit_(cprev))
 							{
 								is_end_clause = 0;  // Roman number followed by dot
 							}
 							else
 							{
-								if (iswlower(c_next) || (c_next=='-'))     // hyphen is needed for lang-hu (eg. 2.-kal)
+								if (iswlower_(c_next) || (c_next=='-'))     // hyphen is needed for lang-hu (eg. 2.-kal)
 									is_end_clause = 0;      // only if followed by lower-case, (or if there is a XML tag)
 							}
 						}
@@ -2604,7 +2604,7 @@ if(option_ssml) parag=1;
 						{
 							is_end_clause = 0;    // eg. u.s.a.'s 
 						}
-						if(iswlower(c_next))
+						if(iswlower_(c_next))
 						{
 							// next word has no capital letter, this dot is probably from an abbreviation
 //							c1 = ' ';
@@ -2642,7 +2642,7 @@ if(option_ssml) parag=1;
 					buf[ix] = ' ';
 					buf[ix+1] = 0;
 
-					if(iswdigit(cprev) && !IsAlpha(c_next))   // ????
+					if(iswdigit_(cprev) && !IsAlpha(c_next))   // ????
 					{
 						punct_data &= ~CLAUSE_DOT;
 					}
@@ -2658,7 +2658,7 @@ if(option_ssml) parag=1;
 				{
 					if(!Eof())
 					{
-						if(iswspace(c2))
+						if(iswspace_(c2))
 							UngetC(c_next);
 					}
 				}
@@ -2688,7 +2688,7 @@ if(option_ssml) parag=1;
 		if(c1 == 0xe000 + '<') c1 = '<';
 
 		ix += utf8_out(c1,&buf[ix]);    //	buf[ix++] = c1;
-		if(!iswspace(c1) && !IsBracket(c1))
+		if(!iswspace_(c1) && !IsBracket(c1))
 		{
 			charix[ix] = count_characters - clause_start_char;
 			while(j < ix)
@@ -2696,7 +2696,7 @@ if(option_ssml) parag=1;
 		}
 		*charix_top = ix;
 
-		if(((ix > (n_buf-20)) && !IsAlpha(c1) && !iswdigit(c1))  ||  (ix >= (n_buf-2)))
+		if(((ix > (n_buf-20)) && !IsAlpha(c1) && !iswdigit_(c1))  ||  (ix >= (n_buf-2)))
 		{
 			// clause too long, getting near end of buffer, so break here
 			// try to break at a word boundary (unless we actually reach the end of buffer).

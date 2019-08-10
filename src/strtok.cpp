@@ -93,7 +93,7 @@ cont:
 	/* NOTREACHED */
 }
 
-char * strtok_r(
+char * strtok_r_(
 	register char *s _AND
 	register const char *delim _AND
 	char **lasts)
@@ -189,7 +189,7 @@ QUICKREF
 
 #ifndef _REENT_ONLY
 
-char *strtok(
+char *strtok_(
 	register char *s _AND
 	register const char *delim)
 {

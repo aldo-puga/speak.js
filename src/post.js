@@ -1,4 +1,51 @@
 
+function run_main(args) {
+  args = args || Module['arguments'];
+
+  if (preloadStartTime === null) preloadStartTime = Date.now();
+
+  if (runDependencies > 0) {
+    return;
+  }
+
+  writeStackCookie();
+
+  preRun();
+
+  if (runDependencies > 0) return; // a preRun added a dependency, run will be called later
+
+  function doRun() {
+    if (ABORT) return;
+
+    ensureInitRuntime();
+
+    preMain();
+
+    if (ENVIRONMENT_IS_WEB && preloadStartTime !== null) {
+      Module.printErr('pre-main prep time: ' + (Date.now() - preloadStartTime) + ' ms');
+    }
+
+    if (Module['onRuntimeInitialized']) Module['onRuntimeInitialized']();
+
+    if (Module['_main'] && args.length > 0)  Module['callMain'](args);
+
+    postRun();
+  }
+
+  if (Module['setStatus']) {
+    Module['setStatus']('Running...');
+    setTimeout(function() {
+      setTimeout(function() {
+        Module['setStatus']('');
+      }, 1);
+      doRun();
+    }, 1);
+  } else {
+    doRun();
+  }
+  checkStackCookie();
+}
+
   FS.ignorePermissions = true;
 
   FS.createPath('/', 'espeak/espeak-data', true, false);
@@ -32,7 +79,7 @@
     this['text']
   ];
 
-  run();
+  run_main();
 
   this['ret'] = new Uint8Array(FS.root.contents['wav.wav'].contents);
 
