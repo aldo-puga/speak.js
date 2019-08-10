@@ -8,7 +8,7 @@ function run_main(args) {
     return;
   }
 
-  writeStackCookie();
+  //writeStackCookie();
 
   preRun();
 
@@ -43,7 +43,7 @@ function run_main(args) {
   } else {
     doRun();
   }
-  checkStackCookie();
+  //checkStackCookie();
 }
 
   FS.ignorePermissions = true;
