@@ -2,7 +2,7 @@ var speakWorker;
 try {
   speakWorker = new Worker('speakWorker.js');
 } catch(e) {
-  console.log('speak.js warning: no worker support');
+  console.warn('speak.js warning: no worker support');
 }
 
 function speak(text, args) {
