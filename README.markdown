@@ -79,6 +79,12 @@ source code though, you might want to build it yourself. To do so, run
 emscripten.sh inside src/. Note that you need to change the paths there.
 
 
+Build dependencies
+------------------
+
+* emsdk
+* sdk-1.37.23-64bit or sdk-1.37.23-32bit
+
 Language Support
 ----------------
 
