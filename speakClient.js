@@ -1,6 +1,19 @@
 var speakWorker;
+
+// https://github.com/yoshi6jp/speak.js/commit/b85d385024f1e20818aa9e3b272c86aa9fc2ebe6
+function getSamePathOfSpeakScript(scriptFile) {
+  var scripts = document.getElementsByTagName('script');
+  for (var i = 0, length = scripts.length; i < length; i++) {
+    var script = scripts[i];
+    if (script.hasAttribute('src') && script.getAttribute('src').endsWith('speakClient.js')) {
+      return script.getAttribute('src').replace('speakClient.js', scriptFile);
+    }
+  }
+  return scriptFile;
+}
+
 try {
-  speakWorker = new Worker('speakWorker.js');
+  speakWorker = new Worker(getSamePathOfSpeakScript('speakWorker.js'));
 } catch(e) {
   console.warn('speak.js warning: no worker support');
 }
