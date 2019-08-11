@@ -24,6 +24,10 @@ cat shell_pre.js > ../speakGenerator.js
 cat speak.raw.js >> ../speakGenerator.js
 cat shell_post.js >> ../speakGenerator.js
 
+make distclean
+make clean
+rm libespeak.*
+rm speak speak.bc speak.o
 
 
 
