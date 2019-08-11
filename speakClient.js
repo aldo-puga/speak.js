@@ -1,4 +1,5 @@
 var speakWorker;
+var suportServiceWork;
 
 // https://github.com/yoshi6jp/speak.js/commit/b85d385024f1e20818aa9e3b272c86aa9fc2ebe6
 function getSamePathOfSpeakScript(scriptFile) {
@@ -12,10 +13,21 @@ function getSamePathOfSpeakScript(scriptFile) {
   return scriptFile;
 }
 
+function importJavaScriptSpeak(filename) {
+  var script = document.createElement('script');
+  script.setAttribute('type', 'text/javascript');
+  script.setAttribute('src', getSamePathOfSpeakScript(filename));
+  document.getElementsByTagName('head')[0].appendChild(script);
+}
+
+
 try {
   speakWorker = new Worker(getSamePathOfSpeakScript('speakWorker.js'));
+  suportServiceWork = true;
 } catch(e) {
   console.warn('speak.js warning: no worker support');
+  suportServiceWork = false;
+  importJavaScriptSpeak('speakGenerator.js');
 }
 
 function speak(text, args) {
@@ -99,7 +111,7 @@ function speak(text, args) {
     if (PROFILE) console.log('speak.js: wav processing took ' + (Date.now()-startTime).toFixed(2) + ' ms');
   }
 
-  if (args && args.noWorker) {
+  if (args && (args.noWorker || !suportServiceWork)) {
     // Do everything right now. speakGenerator.js must have been loaded.
     var startTime = Date.now();
     var wav = generateSpeech(text, args);
