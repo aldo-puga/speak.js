@@ -3,7 +3,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 def process(emscripten_directory, filename):
   file2json = os.path.join(emscripten_directory, 'tools', 'file2json.py')
-  base_dir = '../espeak'
+  base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'espeak')
 
   files = ''
 
@@ -11,11 +11,11 @@ def process(emscripten_directory, filename):
     f = Popen(['python', file2json, os.path.join(base_dir, 'espeak-data', filey), filey], stdout=PIPE).communicate()
     files += f[0]
 
-  f = Popen(['python', file2json, os.path.join(base_dir, 'espeak-data/voices/en/en-us'), 'en_us'], stdout=PIPE).communicate()
+  f = Popen(['python', file2json, os.path.join(base_dir, 'espeak-data', 'voices', 'en', 'en-us'), 'en_us'], stdout=PIPE).communicate()
   files += f[0]
 
   # Needed for French
-  #f = Popen(['python', file2json, os.path.join(base_dir, 'espeak-data/voices/fr'), 'fr'], stdout=PIPE).communicate()
+  #f = Popen(['python', file2json, os.path.join(base_dir, 'espeak-data', 'voices', 'fr'), 'fr'], stdout=PIPE).communicate()
   #files += f[0]
 
   src = open(filename).read()
