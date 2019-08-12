@@ -1,8 +1,8 @@
 import os, sys
 from subprocess import Popen, PIPE, STDOUT
 
-def process(filename):
-  file2json = '/home/alon/Dev/emscripten/tools/file2json.py'
+def process(emscripten_directory, filename):
+  file2json = os.path.join(emscripten_directory, 'tools', 'file2json.py')
   base_dir = '../espeak'
 
   files = ''
@@ -28,5 +28,5 @@ def process(filename):
   out.write(post)
   out.close()
 
-process(sys.argv[1])
+process(sys.argv[1], sys.argv[2])
 

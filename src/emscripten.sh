@@ -23,7 +23,7 @@ mv $ESPEAK_SOURCE/speak $ESPEAK_SOURCE/speak.bc
 #python ~/Dev/emscripten/tools/autodebugger.py speak.orig.ll speak.ll
 
 echo "emscripten"
-$EMSCRIPTEN/emcc -O2 --memory-init-file 0 --js-transform "python bundle.py" $ESPEAK_SOURCE/speak.bc -o speak.raw.js
+$EMSCRIPTEN/emcc -O2 --memory-init-file 0 --js-transform "python bundle.py $EMSCRIPTEN" $ESPEAK_SOURCE/speak.bc -o speak.raw.js
 cat shell_pre.js > ../speakGenerator.js
 cat speak.raw.js >> ../speakGenerator.js
 cat shell_post.js >> ../speakGenerator.js
