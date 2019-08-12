@@ -2,6 +2,8 @@
 # available at https://github.com/kripken/emscripten
 # (change the paths here to match where you set that up in your system).
 
+set -e
+
 # Emscripten directory
 export EMSCRIPTEN=
 # Espeak source code directory
@@ -10,11 +12,6 @@ export ESPEAK_SOURCE=../espeak/src
 echo "make"
 make --directory=$ESPEAK_SOURCE distclean
 make --directory=$ESPEAK_SOURCE clean
-rm $ESPEAK_SOURCE/libespeak.*
-rm $ESPEAK_SOURCE/speak
-rm $ESPEAK_SOURCE/speak.bc
-rm $ESPEAK_SOURCE/speak.o
-rm speak.raw.js
 CXXFLAGS="-DNEED_WCHAR_FUNCTIONS" $EMSCRIPTEN/emmake make --directory=$ESPEAK_SOURCE -j 2 speak
 mv $ESPEAK_SOURCE/speak $ESPEAK_SOURCE/speak.bc
 
@@ -32,10 +29,7 @@ cat shell_post.js >> ../speakGenerator.js
 
 make --directory=$ESPEAK_SOURCE distclean
 make --directory=$ESPEAK_SOURCE clean
-rm $ESPEAK_SOURCE/libespeak.*
-rm $ESPEAK_SOURCE/speak
 rm $ESPEAK_SOURCE/speak.bc
-rm $ESPEAK_SOURCE/speak.o
 rm speak.raw.js
 
 
