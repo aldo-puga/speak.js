@@ -2,7 +2,9 @@
 # available at https://github.com/kripken/emscripten
 # (change the paths here to match where you set that up in your system).
 
-export EMSCRIPTEN=/home/alon/Dev/emscripten
+# Emscripten directory
+export EMSCRIPTEN=
+# Espeak source code directory
 export ESPEAK_SOURCE=../espeak/src
 
 echo "make"
