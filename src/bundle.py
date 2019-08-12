@@ -3,7 +3,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 def process(filename):
   file2json = '/home/alon/Dev/emscripten/tools/file2json.py'
-  base_dir = '..'
+  base_dir = '../espeak'
 
   files = ''
 

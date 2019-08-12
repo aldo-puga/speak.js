@@ -3,14 +3,18 @@
 # (change the paths here to match where you set that up in your system).
 
 export EMSCRIPTEN=/home/alon/Dev/emscripten
+export ESPEAK_SOURCE=../espeak/src
 
 echo "make"
-make distclean
-make clean
-rm libespeak.*
-rm speak speak.bc speak.o
-CXXFLAGS="-DNEED_WCHAR_FUNCTIONS" $EMSCRIPTEN/emmake make -j 2 speak
-mv speak speak.bc
+make --directory=$ESPEAK_SOURCE distclean
+make --directory=$ESPEAK_SOURCE clean
+rm $ESPEAK_SOURCE/libespeak.*
+rm $ESPEAK_SOURCE/speak
+rm $ESPEAK_SOURCE/speak.bc
+rm $ESPEAK_SOURCE/speak.o
+rm speak.raw.js
+CXXFLAGS="-DNEED_WCHAR_FUNCTIONS" $EMSCRIPTEN/emmake make --directory=$ESPEAK_SOURCE -j 2 speak
+mv $ESPEAK_SOURCE/speak $ESPEAK_SOURCE/speak.bc
 
 #echo "dis"
 #~/Dev/llvm/cbuild/bin/llvm-dis -show-annotations speak -o=speak.ll
@@ -19,15 +23,18 @@ mv speak speak.bc
 #python ~/Dev/emscripten/tools/autodebugger.py speak.orig.ll speak.ll
 
 echo "emscripten"
-$EMSCRIPTEN/emcc -O2 --memory-init-file 0 --js-transform "python bundle.py" speak.bc -o speak.raw.js
+$EMSCRIPTEN/emcc -O2 --memory-init-file 0 --js-transform "python bundle.py" $ESPEAK_SOURCE/speak.bc -o speak.raw.js
 cat shell_pre.js > ../speakGenerator.js
 cat speak.raw.js >> ../speakGenerator.js
 cat shell_post.js >> ../speakGenerator.js
 
-make distclean
-make clean
-rm libespeak.*
-rm speak speak.bc speak.o
+make --directory=$ESPEAK_SOURCE distclean
+make --directory=$ESPEAK_SOURCE clean
+rm $ESPEAK_SOURCE/libespeak.*
+rm $ESPEAK_SOURCE/speak
+rm $ESPEAK_SOURCE/speak.bc
+rm $ESPEAK_SOURCE/speak.o
+rm speak.raw.js
 
 
 
