@@ -30,7 +30,7 @@ try {
   importJavaScriptSpeak('speakGenerator.js');
 }
 
-function speak(text, args) {
+function speak(text, args, callback) {
   var PROFILE = 1;
 
   function parseWav(wav) {
@@ -54,61 +54,12 @@ function speak(text, args) {
     };
   }
 
-  function playHTMLAudioElement(wav) {
-    function encode64(data) {
-      var BASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-      var PAD = '=';
-      var ret = '';
-      var leftchar = 0;
-      var leftbits = 0;
-      for (var i = 0; i < data.length; i++) {
-        leftchar = (leftchar << 8) | data[i];
-        leftbits += 8;
-        while (leftbits >= 6) {
-          var curr = (leftchar >> (leftbits-6)) & 0x3f;
-          leftbits -= 6;
-          ret += BASE[curr];
-        }
-      }
-      if (leftbits == 2) {
-        ret += BASE[(leftchar&3) << 4];
-        ret += PAD + PAD;
-      } else if (leftbits == 4) {
-        ret += BASE[(leftchar&0xf) << 2];
-        ret += PAD;
-      }
-      return ret;
-    }
-
-    document.getElementById("audio").innerHTML=("<audio id=\"player\" src=\"data:audio/x-wav;base64,"+encode64(wav)+"\">");
-    document.getElementById("player").play();
-  }
-
-  function playAudioDataAPI(data) {
-    try {
-      var output = new Audio();
-      output.mozSetup(1, data.sampleRate);
-      var num = data.samples.length;
-      var buffer = data.samples;
-      var f32Buffer = new Float32Array(num);
-      for (var i = 0; i < num; i++) {
-        var value = buffer[i<<1] + (buffer[(i<<1)+1]<<8);
-        if (value >= 0x8000) value |= ~0x7FFF;
-        f32Buffer[i] = value / 0x8000;
-      }
-      output.mozWriteAudio(f32Buffer);
-      return true;
-    } catch(e) {
-      return false;
-    }
-  }
-
   function handleWav(wav) {
     var startTime = Date.now();
     var data = parseWav(wav); // validate the data and parse it
     // TODO: try playAudioDataAPI(data), and fallback if failed
-    playHTMLAudioElement(wav);
     if (PROFILE) console.log('speak.js: wav processing took ' + (Date.now()-startTime).toFixed(2) + ' ms');
+    callback(data, wav);
   }
 
   if (args && (args.noWorker || !suportServiceWork)) {
