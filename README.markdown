@@ -21,8 +21,8 @@ Very simple! Do this:
 <script src="speakClient.js"></script>
 ```
 
-   (and make sure you have **speakClient.js** available, as well as
-   **speakWorker.js** and **speakGenerator.js**)
+   (and make sure you have **speak_client.js** available, as well as
+   **speak_worker.js** and **speak_generator.js**)
 
  * Call `speak()` to say stuff in JavaScript
 
@@ -65,17 +65,17 @@ will talk in a very high-pitched voice.
 Architecture
 ------------
 
-**speakClient.js** is the file that you interact with. It defines `speak()`, and
-will load **speakWorker.js** in a web worker. speakWorker wraps around
-**speakGenerator.js**, which does the actual work of converting a string into
+**speak_client.js** is the file that you interact with. It defines `speak()`, and
+will load **speak_worker.js** in a web worker. speakWorker wraps around
+**speak_generator.js**, which does the actual work of converting a string into
 a WAV file. The WAV data is returned to `speak()`, which then call the `callback`
 parameter returning the WAV file and its metadata.
 
-You can also use **speak.js** without a web worker. In that case, you don't
-need **speakWorker.js**, but you do need to load **speakGenerator.js** along
-with **speakClient.js** in your HTML page. `speak()`, if called with noWorker
+You can also use speak.js without a web worker. In that case, you don't
+need **speak_worker.js**, but you do need to load **speak_generator.js** along
+with **speak_client.js** in your HTML page. `speak()`, if called with noWorker
 set to true in the options object, will directly call the WAV generation
-code in **speakGenerator.js** instead of forwarding the call to a worker
+code in **speak_generator.js** instead of forwarding the call to a worker
 which would have done the same.
 
 

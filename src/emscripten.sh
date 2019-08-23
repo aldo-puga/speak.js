@@ -23,9 +23,9 @@ mv $ESPEAK_SOURCE/speak $ESPEAK_SOURCE/speak.bc
 
 echo "emscripten"
 $EMSCRIPTEN/emcc -O2 --memory-init-file 0 --js-transform "python bundle.py $EMSCRIPTEN" $ESPEAK_SOURCE/speak.bc -o speak.raw.js
-cat shell_pre.js > ../speakGenerator.js
-cat speak.raw.js >> ../speakGenerator.js
-cat shell_post.js >> ../speakGenerator.js
+cat shell_pre.js > ../js/speak_generator.js
+cat speak.raw.js >> ../js/speak_generator.js
+cat shell_post.js >> ../js/speak_generator.js
 
 make --directory=$ESPEAK_SOURCE distclean
 make --directory=$ESPEAK_SOURCE clean
