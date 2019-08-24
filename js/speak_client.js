@@ -6,8 +6,8 @@ function getSamePathOfSpeakScript(scriptFile) {
   var scripts = document.getElementsByTagName('script');
   for (var i = 0, length = scripts.length; i < length; i++) {
     var script = scripts[i];
-    if (script.hasAttribute('src') && script.getAttribute('src').endsWith('speakClient.js')) {
-      return script.getAttribute('src').replace('speakClient.js', scriptFile);
+    if (script.hasAttribute('src') && script.getAttribute('src').endsWith('speak_client.js')) {
+      return script.getAttribute('src').replace('speak_client.js', scriptFile);
     }
   }
   return scriptFile;
@@ -22,12 +22,12 @@ function importJavaScriptSpeak(filename) {
 
 
 try {
-  speakWorker = new Worker(getSamePathOfSpeakScript('speakWorker.js'));
+  speakWorker = new Worker(getSamePathOfSpeakScript('speak_worker.js'));
   suportServiceWork = true;
 } catch(e) {
   console.warn('speak.js warning: no worker support');
   suportServiceWork = false;
-  importJavaScriptSpeak('speakGenerator.js');
+  importJavaScriptSpeak('speak_generator.js');
 }
 
 function speak(text, args, callback) {
