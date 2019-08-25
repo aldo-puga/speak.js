@@ -1,9 +1,12 @@
 import os, sys
 from subprocess import Popen, PIPE, STDOUT
 
-SUPORT_LANGUAGES = ['en_us'] # fr Needed for French
+SUPORT_LANGUAGES = ['en_us', 'es', 'fr'] # fr Needed for French
 
 BASE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'espeak')
+JS_VOICES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'js', 'voices')
+JS_VOICES_DICT_DIR = os.path.join(JS_VOICES_DIR, 'dict')
+JS_VOICES_VOICES_DIR = os.path.join(JS_VOICES_DIR, 'voices')
 
 LANGUAGES = {
   'af': ['af_dict', 'af', None],
@@ -61,36 +64,67 @@ LANGUAGES = {
   'zh_yue': ['zhy_dict', 'zh-yue', None],
 }
 
-def process(emscripten_directory, filename):
+def create_directory_if_not_exists(language):
+  if LANGUAGES[language][2]:
+    if not os.path.exists(os.path.join(JS_VOICES_VOICES_DIR, LANGUAGES[language][2])):
+      os.makedirs(os.path.join(JS_VOICES_VOICES_DIR, LANGUAGES[language][2]))
+
+def get_dict_location(language):
+  voice_dict = LANGUAGES[language][0]
+  if LANGUAGES[language][2]:
+    location = os.path.join(LANGUAGES[language][2], LANGUAGES[language][1])
+    virtual_location = '/' + LANGUAGES[language][2]
+  else:
+    location = LANGUAGES[language][1]
+    virtual_location = ''
+  return (voice_dict, location, virtual_location)
+
+def create_dynamic_voices_files(file2json):
+  for language in SUPORT_LANGUAGES:
+    voice_dict, location, virtual_location = get_dict_location(language)
+    create_directory_if_not_exists(language)
+
+    f = Popen(['python', file2json, os.path.join(BASE_DIR, 'espeak-data', voice_dict)], stdout=PIPE).communicate()
+    out = open(os.path.join(JS_VOICES_DICT_DIR, voice_dict) + '.json', 'w')
+    out.write(f[0])
+    out.close()
+
+    f = Popen(['python', file2json, os.path.join(BASE_DIR, 'espeak-data', 'voices', location)], stdout=PIPE).communicate()
+    out = open(os.path.join(JS_VOICES_VOICES_DIR, location) + '.json', 'w')
+    out.write(f[0])
+    out.close()
+
+def create_static_voices_files(file2json, files):
+  create_data_files = ''
+  for language in SUPORT_LANGUAGES:
+    voice_dict, location, virtual_location = get_dict_location(language)
+
+    f = Popen(['python', file2json, os.path.join(BASE_DIR, 'espeak-data', voice_dict), voice_dict], stdout=PIPE).communicate()
+    files += f[0]
+    create_data_files += 'FS.createDataFile(\'/espeak/espeak-data\', \'{}\', {}, true, false);\n'.format(voice_dict, voice_dict)
+
+    f = Popen(['python', file2json, os.path.join(BASE_DIR, 'espeak-data', 'voices', location), language], stdout=PIPE).communicate()
+    files += f[0]
+    create_data_files += 'FS.createDataFile(\'/espeak/espeak-data/voices{}\', \'{}\', {}, true, false);\n'.format(virtual_location, LANGUAGES[language][1], language)
+  return (files, create_data_files)
+
+def process(emscripten_directory, filename, load_dynamically=False):
   file2json = os.path.join(emscripten_directory, 'tools', 'file2json.py')
 
   files = ''
   create_data_files = ''
 
+  if load_dynamically:
+    SUPORT_LANGUAGES = list(LANGUAGES.keys())
+
   for filey in ['config', 'phontab', 'phonindex', 'phondata', 'intonations']:
     f = Popen(['python', file2json, os.path.join(BASE_DIR, 'espeak-data', filey), filey], stdout=PIPE).communicate()
     files += f[0]
 
-  for language in SUPORT_LANGUAGES:
-    f = Popen(['python', file2json, os.path.join(BASE_DIR, 'espeak-data', LANGUAGES[language][0]), LANGUAGES[language][0]], stdout=PIPE).communicate()
-    files += f[0]
-
-    create_data_files += 'FS.createDataFile(\'/espeak/espeak-data\', \'{}\', {}, true, false);\n'.format(LANGUAGES[language][0], LANGUAGES[language][0])
-
-    if LANGUAGES[language][2]:
-        location = os.path.join(LANGUAGES[language][2], LANGUAGES[language][1])
-    else:
-        location = LANGUAGES[language][1]
-
-    f = Popen(['python', file2json, os.path.join(BASE_DIR, 'espeak-data', 'voices', location), language], stdout=PIPE).communicate()
-    files += f[0]
-
-    if LANGUAGES[language][2]:
-        virtual_location = '/' + LANGUAGES[language][2]
-    else:
-        virtual_location = ''
-
-    create_data_files += 'FS.createDataFile(\'/espeak/espeak-data/voices{}\', \'{}\', {}, true, false);\n'.format(virtual_location, LANGUAGES[language][1], language)
+  if load_dynamically:
+    create_dynamic_voices_files(file2json)
+  else:
+    files, create_data_files = create_static_voices_files(file2json, files)
 
   src = open(filename).read()
   pre = open('pre.js').read()
@@ -102,5 +136,8 @@ def process(emscripten_directory, filename):
   out.write(post.replace('{{{ CREATE_DATA_FILES }}}', create_data_files))
   out.close()
 
-process(sys.argv[1], sys.argv[2])
+if len(sys.argv) < 4:
+  process(sys.argv[1], sys.argv[2])
+else:
+  process(sys.argv[2], sys.argv[3], sys.argv[1] == '-d')
 

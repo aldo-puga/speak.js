@@ -1,6 +1,7 @@
 <html>
 <title>speak.js: Text-to-Speech on the Web</title>
 <head>
+  <meta charset="utf-8" />
   <script>
     // This demo is licensed under the GNU GPL.
   </script>
@@ -9,12 +10,17 @@
 <body>
   <h1>speak.js</h1>
   <h2>Text-To-Speech on the Web</h2>
-  <form onsubmit="convertToWAV(text.value, { amplitude: amplitude.value, wordgap: workdgap.value, pitch: pitch.value, speed: speed.value }); return false">
+  <form onsubmit="convertToWAV(text.value, { amplitude: amplitude.value, wordgap: workdgap.value, pitch: pitch.value, speed: speed.value, voice: voice.value }); return false">
     Text: <input type="text" name="text" size=50 value="Never gonna give, you, up.">
     Amplitude: <input type="text" name="amplitude" size=5 value="100">
     Pitch: <input type="text" name="pitch" size=5 value="50">
     Speed: <input type="text" name="speed" size=5 value="175">
     Word gap: <input type="text" name="workdgap" size=5 value="0">
+    Voice: <select name="voice">
+      <option value="en/en-us">English (United States)</option>
+      <option value="es">Español</option>
+      <option value="fr">Française</option>
+    </select>
     <input type="submit" value="Download">
   </form>
   <hr>

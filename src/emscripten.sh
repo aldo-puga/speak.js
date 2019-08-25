@@ -8,6 +8,8 @@ set -e
 export EMSCRIPTEN=
 # Espeak source code directory
 export ESPEAK_SOURCE=../espeak/src
+# Load voices dynamically
+export LOAD_VOICES_DYNAMICALLY=-d
 
 echo "make"
 make --directory=$ESPEAK_SOURCE distclean
@@ -22,10 +24,16 @@ mv $ESPEAK_SOURCE/speak $ESPEAK_SOURCE/speak.bc
 #python ~/Dev/emscripten/tools/autodebugger.py speak.orig.ll speak.ll
 
 echo "emscripten"
-$EMSCRIPTEN/emcc -O2 --memory-init-file 0 --js-transform "python bundle.py $EMSCRIPTEN" $ESPEAK_SOURCE/speak.bc -o speak.raw.js
+$EMSCRIPTEN/emcc -O2 --memory-init-file 0 --js-transform "python bundle.py $LOAD_VOICES_DYNAMICALLY $EMSCRIPTEN" $ESPEAK_SOURCE/speak.bc -o speak.raw.js
 cat shell_pre.js > ../js/speak_generator.js
 cat speak.raw.js >> ../js/speak_generator.js
 cat shell_post.js >> ../js/speak_generator.js
+
+if [ "$LOAD_VOICES_DYNAMICALLY" = "-d" ]; then
+  cat ../js/speak_client_dynamic.js > ../js/speak_client.js
+else
+  cat ../js/speak_client_static.js > ../js/speak_client.js 
+fi
 
 make --directory=$ESPEAK_SOURCE distclean
 make --directory=$ESPEAK_SOURCE clean

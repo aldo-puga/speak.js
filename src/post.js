@@ -60,11 +60,27 @@ function run_main(args) {
 
   {{{ CREATE_DATA_FILES }}}
 
+  var args = this['args'] || {};
+
+  if (args['voice_file'] !== undefined && args['dict_file'] !== undefined) {
+    FS.createDataFile('/espeak/espeak-data' , args['dict'], args['dict_file'], true, false);
+    
+    var voice = args['voice'].split('/');
+    var voicePath;
+    if (voice.length < 2) {
+      voicePath = '/espeak/espeak-data/voices';
+      voice = voice[0];
+    } else {
+      voicePath = '/espeak/espeak-data/voices/' + voice[0];
+      voice = voice[1];
+    }
+    FS.createDataFile(voicePath, voice, args['voice_file'], true, false);
+  }
+
   FS.root.write = true;
 
   FS.ignorePermissions = false;
 
-  var args = this['args'] || {};
   Module.arguments = [
     '-w', 'wav.wav',
     // options
