@@ -145,33 +145,40 @@ function speak(text, args, callback) {
     var voice = args['voice'];
     var dict = LANGUAGES[voice];
 
-    if (speak_js.dicts[dict] === undefined) {
-      var dictPath = getSamePathOfSpeakScript('voices/dict/' + dict + '.json');
-      var dictRequest = new XMLHttpRequest();
-      dictRequest.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          speak_js.dicts[dict] = JSON.parse(this.responseText);
-          args['dict'] = dict;
-          args['dict_file'] = speak_js.dicts[dict];
-          executeDynamically(voice);
-        }
-      };
-      dictRequest.open('GET', dictPath, true);
-      dictRequest.send();
-    }
+    if ((speak_js.dicts[dict] === undefined) || (speak_js.voices[voice] === undefined)) {
+      if (speak_js.dicts[dict] === undefined) {
+        var dictPath = getSamePathOfSpeakScript('voices/dict/' + dict + '.json');
+        var dictRequest = new XMLHttpRequest();
+        dictRequest.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            speak_js.dicts[dict] = JSON.parse(this.responseText);
+            args['dict'] = dict;
+            args['dict_file'] = speak_js.dicts[dict];
+            executeDynamically(voice);
+          }
+        };
+        dictRequest.open('GET', dictPath, true);
+        dictRequest.send();
+      }
 
-    if (speak_js.voices[voice] === undefined) {
-      var voicePath = getSamePathOfSpeakScript('voices/voices/' + voice + '.json');
-      var voiceRequest = new XMLHttpRequest();
-      voiceRequest.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          speak_js.voices[voice] = JSON.parse(this.responseText);
-          args['voice_file'] = speak_js.voices[voice];
-          executeDynamically(voice);
-        }
-      };
-      voiceRequest.open('GET', voicePath, true);
-      voiceRequest.send();
+      if (speak_js.voices[voice] === undefined) {
+        var voicePath = getSamePathOfSpeakScript('voices/voices/' + voice + '.json');
+        var voiceRequest = new XMLHttpRequest();
+        voiceRequest.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            speak_js.voices[voice] = JSON.parse(this.responseText);
+            args['voice_file'] = speak_js.voices[voice];
+            executeDynamically(voice);
+          }
+        };
+        voiceRequest.open('GET', voicePath, true);
+        voiceRequest.send();
+      }
+    } else {
+      args['dict'] = dict;
+      args['dict_file'] = speak_js.dicts[dict];
+      args['voice_file'] = speak_js.voices[voice];
+      executeDynamically(voice);
     }
   }
 
